@@ -1,0 +1,25 @@
+{
+  "name": "amulet-website",
+  "version": "1.0.0",
+  "description": "The website for the Amulet ML website",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tmpim/amulet.git"
+  },
+  "author": "SquidDev and hydraz",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/tmpim/amulet/issues"
+  },
+  "homepage": "https://github.com/tmpim/amulet#readme",
+  "devDependencies": {
+    "html-minifier": "^3.5.21",
+    "http-server": "^0.11.1",
+    "node-sass": "^4.9.4",
+    "normalize.css": "^8.0.0"
+  }
+}

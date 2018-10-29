@@ -18,8 +18,6 @@
   "homepage": "https://github.com/tmpim/amulet#readme",
   "devDependencies": {
     "html-minifier": "^3.5.21",
-    "http-server": "^0.11.1",
-    "node-sass": "^4.9.4",
     "normalize.css": "^8.0.0"
   }
 }

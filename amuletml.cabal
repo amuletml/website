@@ -1,0 +1,28 @@
+name:                amuletml-web
+version:             0.1.0.0
+synopsis:            A functional programming language
+homepage:            https://amulet.ml
+license:             BSD3
+license-file:        LICENSE
+author:              hydraz, squiddev
+maintainer:          urn@semi.works
+category:            Website
+build-type:          Simple
+cabal-version:       >=2.0
+
+executable site
+  main-is:             site.hs
+  build-depends:       base >= 4.9 && < 4.13
+                     , hakyll >= 4.12 && < 5.0
+                     , hakyll-sass >= 0.2.3 && < 0.3
+                     , hsass >= 0.7 && < 0.8
+                     , data-default >= 0.7 && < 0.8
+
+  other-modules:
+  default-language:    Haskell2010
+
+  ghc-options: -Wextra -Wall -Wno-name-shadowing -Wno-implicit-prelude
+
+  if os(linux)
+    ghc-options: -optl-fuse-ld=gold
+    extra-libraries: m, pthread

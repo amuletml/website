@@ -1,0 +1,85 @@
+@import "normalize";
+
+$light-blue: #5fbcd3;
+$dark-blue:  #216778;
+$dark-grey:  #3f3f3f;
+
+$page-width: 1000px;
+
+@mixin link($normal, $hover) {
+  a {
+    &, &:visited, &:active { color: $normal; }
+    &:hover { color: $hover; }
+  }
+}
+
+body {
+  // Use system fonts where possible
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans",
+               "Droid Sans", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+code {
+  // Use system fonts where possible
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+svg { width: 100%; height: 100%; }
+
+.page-container {
+  width: $page-width;
+  margin: 0px auto;
+}
+
+nav {
+  $nav-height: 50px;
+  height: $nav-height;
+
+  .nav-buttons {
+    float: right;
+    height: $nav-height;
+
+    margin: 0px;
+    padding: 0px;
+
+    list-style: none;
+
+    a { text-decoration: none; }
+    @include link($dark-grey, lighten($dark-grey, 20%));
+
+    li {
+      padding: 0px;
+
+      &, a {
+        height: 100%;
+        display: inline-block;
+        margin: 0px;
+      }
+
+      a {
+        padding: 10px 50px;
+        line-height: $nav-height - 20px;
+        box-sizing: border-box;
+      }
+    }
+  }
+}
+
+header {
+  padding: 50px 0px;
+  .header-logo {
+    width: 50%;
+
+    .tagline {
+      color: $dark-grey;
+      font-size: 1.2em;
+    }
+  }
+}
+
+.contrasted {
+  background: $dark-blue;
+  color: #fff;
+
+  padding: 20px 0px;
+}

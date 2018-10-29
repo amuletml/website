@@ -27,4 +27,5 @@ doc/*.synctex.gz
 /*.xml
 
 /node_modules
-/build
+/_site
+/_cache

@@ -17,6 +17,10 @@ executable site
                      , hakyll-sass >= 0.2.3 && < 0.3
                      , hsass >= 0.7 && < 0.8
                      , data-default >= 0.7 && < 0.8
+                     , tagsoup >= 0.14 && < 0.15
+                     , text >= 1.2 && < 1.3
+                     , skylighting >= 0.7 && < 0.8
+                     , unordered-containers >= 0.2 && < 0.3
 
   other-modules:
   default-language:    Haskell2010

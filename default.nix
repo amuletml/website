@@ -35,6 +35,10 @@ let
       , hakyll
       , hakyll-sass
       , hsass
+      , tagsoup
+      , text
+      , skylighting
+      , unordered-containers
       }:
       mkDerivation rec {
         pname = "amuletml-web";
@@ -45,7 +49,8 @@ let
         isExecutable = true;
 
         executableHaskellDepends = [
-          base data-default hakyll hakyll-sass hsass
+          base data-default hakyll hakyll-sass hsass tagsoup
+          text skylighting unordered-containers
         ];
 
         buildDepends = [ pkgs.cabal-install ];

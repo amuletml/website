@@ -37,6 +37,11 @@ main = hakyllWith def { previewHost = "0.0.0.0"
                                        , sassImporters = Just [ sassImporter ]
                                        }
 
+    -- TODO: Use typescript instead?
+    match "assets/main.js" $ do
+        route $ setExtension "js"
+        compile $ getResourceString
+
     match "index.html" $ do
         route idRoute
         compile $ getResourceBody
@@ -81,10 +86,17 @@ highlightAmulet = pure . fmap (withTagList walk) where
     = o : highlight src ++ c:walk xs
   walk (x:xs) = x:walk xs
 
+  -- | Normalise a highlighted block to trim trailing/leading line and remove the indent.
+  dropIndent :: T.Text -> T.Text
+  dropIndent t =
+    let lines = dropWhile (T.all isSpace) . dropWhileEnd (T.all isSpace) . T.lines $ t
+        indent = minimum . map (T.length . T.takeWhile isSpace) $ lines
+    in T.intercalate "\n" . map (T.drop indent) $ lines
+
   highlight :: String -> [TS.Tag String]
   highlight txt =
     let Just syntax = S.lookupSyntax "Objective Caml" S.defaultSyntaxMap
-        Right lines = S.tokenize (S.TokenizerConfig S.defaultSyntaxMap False) syntax (T.pack txt)
+        Right lines = S.tokenize (S.TokenizerConfig S.defaultSyntaxMap False) syntax . dropIndent . T.pack $ txt
     in foldr (flip (foldr mkElement . (TS.TagText "\n":))) [] lines
 
   mkElement :: S.Token -> [TS.Tag String] -> [TS.Tag String]

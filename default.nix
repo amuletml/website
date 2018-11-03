@@ -61,8 +61,8 @@ let
       };
 
   haskellPackages = pkgs.haskell.packages.${compiler};
-
-  drv = nixpkgs.haskellPackages.callPackage f {};
+  # TODO: Fix this so we're using the above packages _and_ the overrides
+  drv = pkgs.haskellPackages.callPackage f {};
 
 in
   if pkgs.lib.inNixShell then drv.env else drv

@@ -26,6 +26,7 @@ main :: IO ()
 main = hakyllWith def { previewHost = "0.0.0.0"
                       , previewPort = 8080
                       } $ do
+
     match "assets/*.svg" $ do
         route idRoute
         compile $ getResourceString
@@ -41,6 +42,10 @@ main = hakyllWith def { previewHost = "0.0.0.0"
     match "assets/main.js" $ do
         route $ setExtension "js"
         compile $ getResourceString
+
+    match ("assets/**.png" .||. "*.ico") $ do
+        route   idRoute
+        compile copyFileCompiler
 
     match "index.html" $ do
         route idRoute

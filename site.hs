@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings, MultiWayIf #-}
 
+import qualified Data.ByteString.Lazy.Char8 as BS
+import qualified Data.Digest.Pure.SHA as SHA
 import qualified Data.HashSet as HSet
 import qualified Data.Text as T
 import Data.Default
@@ -17,7 +19,7 @@ import Hakyll
 import qualified Skylighting as S
 
 compress :: Bool
-compress = False
+compress = True
 
 compresses :: Applicative m => (a -> m a) -> a -> m a
 compresses f = if compress then f else pure
@@ -63,7 +65,9 @@ siteCtx :: Context String
 siteCtx = defaultContext
        <> constField "site.title" "Amulet ML"
        <> constField "site.description" "Amulet is a simple, functional programming language in the ML tradition"
-       <> constField "site.versions.main_css" ""
+
+       <> field "site.versions.main_css" (const . hashCompiler . fromFilePath $ "assets/main.scss")
+       <> field "site.versions.main_js"  (const . hashCompiler . fromFilePath $ "assets/main.js")
 
 -- | A custom sass importer which also looks within @node_modules@.
 sassImporter :: SassImporter
@@ -181,3 +185,10 @@ minifyHtml = pure . fmap (withTagList (walk [] [] [])) where
 
   maybeCons True x xs = x:xs
   maybeCons False _ xs = xs
+
+-- | Generate a trivial cachebuster hash of a cached identifier.
+--
+-- Note that this should be a file in the main directory, not result of a
+-- match.
+hashCompiler :: Identifier -> Compiler String
+hashCompiler x = take 16 . SHA.showDigest . SHA.sha256 . BS.pack <$> loadBody x

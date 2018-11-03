@@ -31,12 +31,14 @@ let
 
   f = { mkDerivation, stdenv
       , base
+      , bytestring
       , data-default
       , hakyll
       , hakyll-sass
       , hsass
       , tagsoup
       , text
+      , SHA
       , skylighting
       , unordered-containers
       }:
@@ -49,8 +51,9 @@ let
         isExecutable = true;
 
         executableHaskellDepends = [
-          base data-default hakyll hakyll-sass hsass tagsoup
-          text skylighting unordered-containers
+          base bytestring data-default
+          hakyll hakyll-sass hsass tagsoup
+          text SHA skylighting unordered-containers
         ];
 
         buildDepends = [ pkgs.cabal-install ];

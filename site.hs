@@ -75,7 +75,7 @@ sassImporter = SassImporter 0 go where
   go "normalize" _ = do
     c <- readFile "node_modules/normalize.css/normalize.css"
     pure [ SassImport { importPath = Nothing
-                      , importBase = Nothing
+                      , importAbsolutePath = Nothing
                       , importSource = Just c
                       , importSourceMap = Nothing
                       } ]
@@ -123,7 +123,11 @@ highlightAmulet = pure . fmap (withTagList walk) where
 -- | Attempts to minify the HTML contents by removing all superfluous
 -- whitespace.
 minifyHtml :: Item String -> Compiler (Item String)
-minifyHtml = pure . fmap (withTagList (walk [] [] [])) where
+minifyHtml = pure . fmap minifyHtml'
+
+-- | The main worker for minifyHtml.
+minifyHtml' :: String -> String
+minifyHtml' = withTagList (walk [] [] []) where
   walk _ _ _ [] = []
   walk noTrims noCollapses inlines (x:xs) = case x of
     o@(TS.TagOpen tag _) ->
@@ -132,8 +136,8 @@ minifyHtml = pure . fmap (withTagList (walk [] [] [])) where
              (maybeCons (inline tag) tag inlines)
              xs
 
-    TS.TagText text -> (:walk noTrims noCollapses inlines xs) . TS.TagText $ if
-        | null noCollapses -> collapse (null inlines) text
+    TS.TagText text -> (:walk noTrims noCollapses inlines xs) . TS.TagText $
+      if
         | null noCollapses -> collapse (null inlines) text
         | null noTrims     -> trim (null inlines) text
         | otherwise        -> text
@@ -145,9 +149,9 @@ minifyHtml = pure . fmap (withTagList (walk [] [] [])) where
              xs
 
     -- Strip metadata
-    (TS.TagComment{})  -> walk noTrims noCollapses inlines xs
-    (TS.TagWarning{})  -> walk noTrims noCollapses inlines xs
-    (TS.TagPosition{}) -> walk noTrims noCollapses inlines xs
+    TS.TagComment{}  -> walk noTrims noCollapses inlines xs
+    TS.TagWarning{}  -> walk noTrims noCollapses inlines xs
+    TS.TagPosition{} -> walk noTrims noCollapses inlines xs
 
   noTrim, noCollapse, inline :: String -> Bool
   -- | Tags which should not have whitespace touched (consecutive spaces
@@ -161,20 +165,28 @@ minifyHtml = pure . fmap (withTagList (walk [] [] [])) where
   -- have leading/trailing spaces preserved.
   inline = flip HSet.member $ HSet.fromList
     [ "a", "abbr", "acronym", "b", "bdi", "bdo", "big", "button", "cite", "code"
-    , "del", "dfn", "em", "font", "i", "img", "input", "ins", "kbd", "label"
-    , "mark", "math", "nobr", "object", "p", "q", "rp", "rt", "rtc", "ruby"
-    , "s", "samp", "select", "small", "span", "strike", "strong", "sub", "sup"
-    , "svg", "textarea", "time", "tt", "u", "var", "wbr"
+    , "del", "dfn", "em", "font", "figcaption", "i", "img", "input", "ins", "kbd"
+    , "label" , "li", "mark", "math", "nobr", "object", "p", "q", "rp", "rt"
+    , "rtc", "ruby", "s", "samp", "select", "small", "span", "strike", "strong"
+    , "sub", "sup", "svg", "textarea", "time", "tt", "u", "var", "wbr"
     ]
 
   trim _ "" = ""
-  trim strip xs = makeSpacey strip . dropWhile isSpace . dropWhileEnd isSpace $ xs
+  trim strip xs =
+    let isLast = not strip && isSpace (last xs)
+        isFirst = not strip && isSpace (head xs)
 
-  makeSpacey False "" = " "
-  makeSpacey _ xs = xs
+        space True = " "
+        space False = ""
+    in
+    case dropWhile isSpace . dropWhileEnd isSpace $ xs of
+      "" -> space (isFirst || isLast)
+      xs -> space isFirst ++ xs ++ space isLast
 
+  -- | Collapse adjacent spaces into one, and optionally trim the front/back
   collapse strip = trim strip . collapse'
 
+  -- | Collapses adjacent spaces into one
   collapse' [] = []
   collapse' (x:xs)
     | isSpace x = ' ':collapse' (dropWhile isSpace xs)

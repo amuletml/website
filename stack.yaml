@@ -1,0 +1,8 @@
+resolver: lts-14.14
+
+extra-deps:
+- hakyll-4.13.0.1@sha256:0f27d74feaedc96648ec5377ecec2b35dd677516c9667d179462a350f2075628,8817
+- hakyll-sass-0.2.4@sha256:4d2fbd8b63f5ef15483fc6dda09e10eefd63b4f873ad38dec2a3607eb504a8ba,939
+
+require-stack-version: ">=1.9"
+compiler-check: newer-minor

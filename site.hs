@@ -4,6 +4,8 @@ import System.Directory
 import System.Process
 import System.IO
 
+import Control.Monad
+
 import qualified Data.ByteString.Lazy.Char8 as BS
 import qualified Data.Digest.Pure.SHA as SHA
 import qualified Data.HashSet as HSet
@@ -45,7 +47,7 @@ main = hakyllWith def { previewHost = "0.0.0.0"
     route $ setExtension "css"
     compile $ sassCompilerWith def { sassOutputStyle = if compress then SassStyleCompressed else SassStyleExpanded
                                    , sassImporters = Just [ sassImporter ]
-                                     }
+                                   }
   match ("assets/**.png" .||. "*.ico") $ do
     route   idRoute
     compile copyFileCompiler
@@ -55,8 +57,7 @@ main = hakyllWith def { previewHost = "0.0.0.0"
     compile $ getResourceBody
          >>= applyAsTemplate siteCtx
          >>= highlightAmulet
-         >>= loadAndApplyTemplate "templates/default.html" siteCtx
-         >>= compresses minifyHtml
+         >>= defaultTemplate
 
   match "tutorials/*.ml" $ do
     route $ setExtension "html"
@@ -64,34 +65,26 @@ main = hakyllWith def { previewHost = "0.0.0.0"
       opts <- writerOptions
       Item _ contents <- getResourceBody
 
-      (path, handle) <- unsafeCompiler $ openTempFile "/tmp/" "example.ml"
-      () <- unsafeCompiler $ do
+      body <- unsafeCompiler $ do
+        (path, handle) <- openTempFile "/tmp/" "example.ml"
         hPutStr handle contents
         hFlush handle
+        body <- readProcess "amc-example" [ path ] ""
+        removePathForcibly path
+        pure body
 
-      body <- unsafeCompiler
-        (readProcess "amc-example" [ path ] "")
-
-      let contents = Item (fromFilePath (path ++ ".md")) body
-          exampleCtx = siteCtx <> constField "example" "true"
-
+      let contents = Item (fromFilePath "example.md") body
       Item _ contents <- writePandocWith opts <$> readPandocWith readerOptions contents
-
-      unsafeCompiler $ removePathForcibly path
 
       makeItem contents
         >>= loadAndApplyTemplate "templates/example.html" defaultContext
-        >>= loadAndApplyTemplate "templates/content.html" defaultContext
-        >>= loadAndApplyTemplate "templates/default.html" exampleCtx
-        >>= relativizeUrls
+        >>= contentTemplate
 
   match "tutorials/*.md" $ do
     route $ setExtension "html"
     compile $ pandocCustomCompiler
-      >>= loadAndApplyTemplate "templates/tutorial.html" defaultContext
-      >>= loadAndApplyTemplate "templates/content.html" defaultContext
-      >>= loadAndApplyTemplate "templates/default.html" siteCtx
-      >>= relativizeUrls
+          >>= loadAndApplyTemplate "templates/tutorial.html" defaultContext
+          >>= contentTemplate
 
   match "tutorials/index.html" $ do
     route idRoute
@@ -101,16 +94,12 @@ main = hakyllWith def { previewHost = "0.0.0.0"
             <> listField "examples" siteCtx (loadAll "tutorials/*.ml")
       getResourceBody
         >>= applyAsTemplate indexCtx
-        >>= loadAndApplyTemplate "templates/content.html" defaultContext
-        >>= loadAndApplyTemplate "templates/default.html" siteCtx
-        >>= relativizeUrls
+        >>= contentTemplate
 
   match "reference/*.md" $ do
     route $ setExtension "html"
     compile $ pandocCustomCompiler
-      >>= loadAndApplyTemplate "templates/content.html" defaultContext
-      >>= loadAndApplyTemplate "templates/default.html" siteCtx
-      >>= relativizeUrls
+          >>= contentTemplate
 
   match "templates/*" $ compile templateBodyCompiler
 
@@ -183,6 +172,18 @@ highlightAmulet = pure . fmap (withTagList walk) where
   tokName t =
     let name = show t
     in map toLower . take (length name - 3) $ name
+
+-- | Apply the default content template
+contentTemplate :: Item String -> Compiler (Item String)
+contentTemplate =
+      loadAndApplyTemplate "templates/content.html" defaultContext
+  >=> defaultTemplate
+
+-- | Apply the default HTML template
+defaultTemplate :: Item String -> Compiler (Item String)
+defaultTemplate =
+      loadAndApplyTemplate "templates/default.html" siteCtx
+  >=> compresses minifyHtml
 
 -- | Attempts to minify the HTML contents by removing all superfluous
 -- whitespace.

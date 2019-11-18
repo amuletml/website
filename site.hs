@@ -158,7 +158,7 @@ highlightAmulet syntaxMap = pure . fmap (withTagList walk) where
   dropIndent :: T.Text -> T.Text
   dropIndent t =
     let lines = dropWhile (T.all isSpace) . dropWhileEnd (T.all isSpace) . T.lines $ t
-        indent = minimum . map (T.length . T.takeWhile isSpace) $ lines
+        indent = minimum . map (T.length . T.takeWhile isSpace) . filter (not . T.null) $ lines
     in T.intercalate "\n" . map (T.drop indent) $ lines
 
   highlight :: String -> String -> [TS.Tag String]
@@ -182,6 +182,9 @@ highlightAmulet syntaxMap = pure . fmap (withTagList walk) where
     : TS.TagOpen "span" [("class", short CommentTok)] : TS.TagText (T.unpack after) : TS.TagClose "span"
     : TS.TagClose "span"
     : xs
+
+    | NormalTok <- ty
+    = TS.TagText (T.unpack txt) : xs
 
     | otherwise
     = TS.TagOpen "span" [("class", short ty)]

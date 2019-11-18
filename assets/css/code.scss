@@ -69,6 +69,7 @@ span.cv { color: #60a0b0; } /* CommentVar */
     // We hide the before/after text, but want them to be copyable.
     .co {
       width: 0px;
+      height: 0px;
       display: inline-block;
       overflow: hidden;
     }

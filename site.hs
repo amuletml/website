@@ -11,6 +11,7 @@ import Control.Monad
 import qualified Data.ByteString.Lazy.Char8 as BS
 import qualified Data.Digest.Pure.SHA as SHA
 import qualified Data.HashSet as HSet
+import qualified Data.Text.Read as T
 import qualified Data.Text as T
 import Data.Foldable
 import Data.Map (Map)
@@ -29,6 +30,7 @@ import Hakyll.Core.Configuration
 import Hakyll
 
 import qualified Skylighting as S
+import Skylighting (TokenType(..))
 
 compress :: Bool
 compress = True
@@ -131,46 +133,6 @@ siteCtx = defaultContext
           -- TODO: This needs to be done on the output!
        <> field "site.versions.main_css" (const . hashCompiler . fromFilePath $ "assets/css/main.scss")
 
-
--- | Looks around for blocks marked as @data-language="amulet"@ and
--- highlight them.
---
--- This uses the OCaml highligher from Skylight for now (which is what
--- Pandoc uses), but we will move this to use the Amulet compiler in the
--- future.
-highlightAmulet :: Map T.Text S.Syntax -> Item String -> Compiler (Item String)
-highlightAmulet syntaxMap = pure . fmap (withTagList walk) where
-  walk [] = []
-  walk (o@(TS.TagOpen "pre" attrs):TS.TagText src:c@(TS.TagClose "pre"):xs)
-    | elem ("data-language", "amulet") attrs
-    = o : highlight src ++ c:walk xs
-  walk (x:xs) = x:walk xs
-
-  -- | Normalise a highlighted block to trim trailing/leading line and remove the indent.
-  dropIndent :: T.Text -> T.Text
-  dropIndent t =
-    let lines = dropWhile (T.all isSpace) . dropWhileEnd (T.all isSpace) . T.lines $ t
-        indent = minimum . map (T.length . T.takeWhile isSpace) $ lines
-    in T.intercalate "\n" . map (T.drop indent) $ lines
-
-  highlight :: String -> [TS.Tag String]
-  highlight txt =
-    let Just syntax = S.lookupSyntax "Amulet" syntaxMap
-        Right lines = S.tokenize (S.TokenizerConfig syntaxMap False) syntax . dropIndent . T.pack $ txt
-    in foldr (flip (foldr mkElement . (TS.TagText "\n":))) [] lines
-
-  mkElement :: S.Token -> [TS.Tag String] -> [TS.Tag String]
-  mkElement (ty, txt) xs
-    = TS.TagOpen "span" [("class", "tok-" ++ tokName ty)]
-    : TS.TagText (T.unpack txt)
-    : TS.TagClose "span"
-    : xs
-
-  tokName :: S.TokenType -> String
-  tokName t =
-    let name = show t
-    in map toLower . take (length name - 3) $ name
-
 -- | Apply the default content template
 contentTemplate :: Item String -> Compiler (Item String)
 contentTemplate =
@@ -182,6 +144,87 @@ defaultTemplate :: Item String -> Compiler (Item String)
 defaultTemplate =
       loadAndApplyTemplate "templates/default.html" siteCtx
   >=> compresses minifyHtml
+
+-- | Looks around for blocks marked as @data-language=@ and highlight them.
+highlightAmulet :: Map T.Text S.Syntax -> Item String -> Compiler (Item String)
+highlightAmulet syntaxMap = pure . fmap (withTagList walk) where
+  walk [] = []
+  walk (o@(TS.TagOpen "pre" attrs):TS.TagText src:c@(TS.TagClose "pre"):xs)
+    | Just (_, language) <- find (\(tag, _) -> tag == "data-language") attrs
+    = o : highlight language src ++ c:walk xs
+  walk (x:xs) = x:walk xs
+
+  -- | Normalise a highlighted block to trim trailing/leading line and remove the indent.
+  dropIndent :: T.Text -> T.Text
+  dropIndent t =
+    let lines = dropWhile (T.all isSpace) . dropWhileEnd (T.all isSpace) . T.lines $ t
+        indent = minimum . map (T.length . T.takeWhile isSpace) $ lines
+    in T.intercalate "\n" . map (T.drop indent) $ lines
+
+  highlight :: String -> String -> [TS.Tag String]
+  highlight language txt =
+    let Just syntax = S.lookupSyntax (T.pack language) syntaxMap
+        Right lines = S.tokenize (S.TokenizerConfig syntaxMap False) syntax . dropIndent . T.pack $ txt
+    in foldr (flip (foldr mkElement . (TS.TagText "\n":))) [] lines
+
+  mkElement :: S.Token -> [TS.Tag String] -> [TS.Tag String]
+  mkElement (ty, txt) xs
+    | CommentTok <- ty
+    , (before, txt') <- T.span isCommenty txt
+    , (txt'', after) <- T.span isDigit txt'
+    , T.all isCommenty after
+    , Right (idx :: Int, "") <- T.decimal txt''
+      -- If we can strip all punctuation and spaces, and end up with a
+      -- number, assume this is an annotation indicator.
+    = TS.TagOpen "span" [("class", "annotate")]
+    : TS.TagOpen "span" [("class", short CommentTok)] : TS.TagText (T.unpack before) : TS.TagClose "span"
+    : TS.TagText (show idx)
+    : TS.TagOpen "span" [("class", short CommentTok)] : TS.TagText (T.unpack after) : TS.TagClose "span"
+    : TS.TagClose "span"
+    : xs
+
+    | otherwise
+    = TS.TagOpen "span" [("class", short ty)]
+    : TS.TagText (T.unpack txt)
+    : TS.TagClose "span"
+    : xs
+
+  -- | Is this likely to be part of comment preamble?
+  isCommenty x = isPunctuation x || isSpace x
+
+  -- | See Skylighting.Format.HTML
+  short :: TokenType -> String
+  short KeywordTok        = "kw"
+  short DataTypeTok       = "dt"
+  short DecValTok         = "dv"
+  short BaseNTok          = "bn"
+  short FloatTok          = "fl"
+  short CharTok           = "ch"
+  short StringTok         = "st"
+  short CommentTok        = "co"
+  short OtherTok          = "ot"
+  short AlertTok          = "al"
+  short FunctionTok       = "fu"
+  short RegionMarkerTok   = "re"
+  short ErrorTok          = "er"
+  short ConstantTok       = "cn"
+  short SpecialCharTok    = "sc"
+  short VerbatimStringTok = "vs"
+  short SpecialStringTok  = "ss"
+  short ImportTok         = "im"
+  short DocumentationTok  = "do"
+  short AnnotationTok     = "an"
+  short CommentVarTok     = "cv"
+  short VariableTok       = "va"
+  short ControlFlowTok    = "cf"
+  short OperatorTok       = "op"
+  short BuiltInTok        = "bu"
+  short ExtensionTok      = "ex"
+  short PreprocessorTok   = "pp"
+  short AttributeTok      = "at"
+  short InformationTok    = "in"
+  short WarningTok        = "wa"
+  short NormalTok         = ""
 
 -- | Attempts to minify the HTML contents by removing all superfluous
 -- whitespace.
@@ -231,7 +274,7 @@ minifyHtml' = withTagList (walk [] [] []) where
     , "del", "dfn", "em", "font", "figcaption", "i", "img", "input", "ins", "kbd"
     , "label" , "li", "mark", "math", "nobr", "object", "p", "q", "rp", "rt"
     , "rtc", "ruby", "s", "samp", "select", "small", "span", "strike", "strong"
-    , "sub", "sup", "svg", "textarea", "time", "tt", "u", "var", "wbr"
+    , "sub", "sup", "svg", "td", "textarea", "time", "tt", "u", "var", "wbr"
     ]
 
   trim _ "" = ""

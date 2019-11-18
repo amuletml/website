@@ -68,29 +68,6 @@ header {
   padding: 20px 0;
 }
 
-.highlight {
-  // background: #282c34;
-  color: #303030;
-
-  .tok-string   { color: #CB4B16; }
-  .tok-decval   { color: #268BD2; }
-  .tok-keyword  { color: #AF005F; }
-  .tok-comment  { color: #909090; }
-  .tok-operator { color: #D33682; }
-
-  .tok-specialstring { color: #2AA198; }
-  .tok-datatype      { color: #5F5FAF; }
-
-  .tok-annotate {
-    text-align: center;
-    border: solid 1px;
-    border-radius: 0.5em;
-    padding: 0 0.5em;
-
-    display: inline-block; // Seems to fix horizontal overlap
-  }
-}
-
 .annotated-example {
   display: flex;
   flex-direction: column;

@@ -19,7 +19,14 @@ table.sourceCode {
   width: 100%; line-height: 100%;
 }
 
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.lineNumbers {
+  text-align: right;
+  padding-right: 4px;
+  padding-left: 4px;
+  color: #aaaaaa;
+  border-right: 1px solid #aaaaaa;
+}
+
 td.sourceCode { padding-left: 5px; }
 span.kw { color: #af005f; } /* Keyword */
 span.dt { color: #5f5faf; } /* DataType */
@@ -49,3 +56,21 @@ span.at { color: #7d9029; } /* Attribute */
 span.do { color: #ba2121; } /* Documentation */
 span.an { color: #60a0b0; } /* Annotation */
 span.cv { color: #60a0b0; } /* CommentVar */
+
+.highlight, .sourceCode {
+  .annotate {
+    color: #303030;
+    text-align: center;
+    border: solid 1px;
+    border-radius: 0.5em;
+    padding: 0 0.5em;
+    font-size: 0.8em;
+
+    // We hide the before/after text, but want them to be copyable.
+    .co {
+      width: 0px;
+      display: inline-block;
+      overflow: hidden;
+    }
+  }
+}

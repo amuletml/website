@@ -58,9 +58,9 @@ description: A programming language
       <pre data-language="amulet" class="highlight">
 let map f = function (* 1 *)
 | [] -> []
-| Cons (x, xs) -> Cons (f x, map f xs) (* 2*)
+| Cons (x, xs) -> Cons (f x, map f xs) (* 2 *)
 
-let filter p xs = [ x | with x <- xs, p x ] (* 3*)
+let filter p xs = [ x | with x <- xs, p x ] (* 3 *)
       </pre>
       <ol>
         <li>

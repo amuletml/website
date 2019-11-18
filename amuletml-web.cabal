@@ -18,7 +18,6 @@ executable site
                      , data-default >= 0.7 && < 0.8
                      , filepath >= 1.4 && < 2.0
                      , hakyll >= 4.12 && < 5.0
-                     , hakyll-sass >= 0.2.3 && < 0.3
                      , hsass >= 0.7 && < 0.9
                      , mtl >= 2.2.2 && < 3.0
                      , pandoc >= 2.2 && < 3.0

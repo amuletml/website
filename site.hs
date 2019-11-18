@@ -1,4 +1,6 @@
-{-# LANGUAGE OverloadedStrings, MultiWayIf #-}
+{-# LANGUAGE MultiWayIf, OverloadedStrings, ScopedTypeVariables #-}
+
+module Main(main) where
 
 import System.Directory
 import System.Process
@@ -10,6 +12,7 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 import qualified Data.Digest.Pure.SHA as SHA
 import qualified Data.HashSet as HSet
 import qualified Data.Text as T
+import Data.Foldable
 import Data.Map (Map)
 import Data.Functor
 import Data.Default
@@ -20,10 +23,9 @@ import qualified Text.HTML.TagSoup as TS
 
 import Text.Pandoc.Highlighting
 import Text.Pandoc.Options
-import Text.Sass.Functions
+import Text.Sass
 
 import Hakyll.Core.Configuration
-import Hakyll.Web.Sass
 import Hakyll
 
 import qualified Skylighting as S
@@ -44,11 +46,14 @@ main = hakyllWith def { previewHost = "0.0.0.0"
     compile $ getResourceString
           >>= compresses minifyHtml
 
-  match ("assets/css/main.scss" .||. "assets/css/computer-modern.scss") $ do
+  match "assets/css/main.scss" $ do
     route $ setExtension "css"
-    compile $ sassCompilerWith def { sassOutputStyle = if compress then SassStyleCompressed else SassStyleExpanded
-                                   , sassImporters = Just [ sassImporter ]
-                                   }
+    compile sassCompiler
+
+  -- We load all other files and just compile them to units. This is a little
+  -- dubious, but saves us doing anything complex.
+  match ("assets/**.scss" .||. "node_modules/**.css") $ compile (makeItem ())
+
   match ("assets/**.png" .||. "*.ico") $ do
     route   idRoute
     compile copyFileCompiler
@@ -126,17 +131,6 @@ siteCtx = defaultContext
           -- TODO: This needs to be done on the output!
        <> field "site.versions.main_css" (const . hashCompiler . fromFilePath $ "assets/css/main.scss")
 
--- | A custom sass importer which also looks within @node_modules@.
-sassImporter :: SassImporter
-sassImporter = SassImporter 0 go where
-  go "normalize" _ = do
-    c <- readFile "node_modules/normalize.css/normalize.css"
-    pure [ SassImport { importPath = Nothing
-                      , importAbsolutePath = Nothing
-                      , importSource = Just c
-                      , importSourceMap = Nothing
-                      } ]
-  go _ _ = pure []
 
 -- | Looks around for blocks marked as @data-language="amulet"@ and
 -- highlight them.
@@ -298,3 +292,33 @@ writerOptions = do
     , writerSyntaxMap = syntaxMap
     , writerHighlightStyle = Just kate
     }
+
+-- | Compiles sass files to CSS.
+--
+-- Similar to that provided by hakyll-sass, but correctly handles
+-- dependencies.
+sassCompiler :: Compiler (Item String)
+sassCompiler = do
+  path <- getResourceFilePath
+  (contents, deps) <- unsafeCompiler $ do
+    result <- compileFile path options
+    case result of
+      Left err -> errorMessage err >>= fail
+      Right result -> do
+        lPath <- canonicalizePath path
+        includes <- resultIncludes result
+                >>= traverse canonicalizePath
+                <&> delete lPath
+                >>= traverse makeRelativeToCurrentDirectory
+        pure (resultString result, includes)
+
+  -- Mark each of these as a dependency.
+  traverse_ (fmap (\(_ :: Item ()) -> ()) . load . fromFilePath) deps
+  makeItem contents
+
+  where
+    options :: SassOptions
+    options = def
+      { sassOutputStyle = if compress then SassStyleCompressed else SassStyleExpanded
+      , sassIncludePaths = Just ["node_modules/normalize.css"]
+      }

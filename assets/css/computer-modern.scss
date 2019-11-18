@@ -1,0 +1,13 @@
+@font-face {
+  font-family: "Computer Modern";
+  src: url('/static/cmunorm.woff');
+}
+
+.math {
+  font-family: Computer Modern, serif;
+}
+
+.math .display {
+  font-size: 18px;
+  text-align: center;
+}

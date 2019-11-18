@@ -1,0 +1,19 @@
+$light-blue: #5fbcd3;
+$dark-blue:  #216778;
+$dark-grey:  #3f3f3f;
+
+$page-width: 1000px;
+
+@mixin link($normal, $hover) {
+  a {
+    &, &:visited, &:active { color: $normal; }
+    &:hover { color: $hover; }
+  }
+}
+
+@mixin link-bg($normal, $hover) {
+  a {
+    &, &:visited, &:active { background-color: $normal; }
+    &:hover { background-color: $hover; }
+  }
+}

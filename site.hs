@@ -1,15 +1,22 @@
 {-# LANGUAGE OverloadedStrings, MultiWayIf #-}
 
+import System.Directory
+import System.Process
+import System.IO
+
 import qualified Data.ByteString.Lazy.Char8 as BS
 import qualified Data.Digest.Pure.SHA as SHA
 import qualified Data.HashSet as HSet
 import qualified Data.Text as T
+import Data.Functor
 import Data.Default
 import Data.List
 import Data.Char
 
 import qualified Text.HTML.TagSoup as TS
 
+import Text.Pandoc.Highlighting
+import Text.Pandoc.Options
 import Text.Sass.Functions
 
 import Hakyll.Core.Configuration
@@ -29,35 +36,92 @@ main = hakyllWith def { previewHost = "0.0.0.0"
                       , previewPort = 8080
                       } $ do
 
-    match "assets/*.svg" $ do
-        route idRoute
-        compile $ getResourceString
-              >>= compresses minifyHtml
+  match "assets/*.svg" $ do
+    route idRoute
+    compile $ getResourceString
+          >>= compresses minifyHtml
 
-    match "assets/main.scss" $ do
-        route $ setExtension "css"
-        compile $ sassCompilerWith def { sassOutputStyle = if compress then SassStyleCompressed else SassStyleExpanded
-                                       , sassImporters = Just [ sassImporter ]
-                                       }
+  match ("assets/css/main.scss" .||. "assets/css/computer-modern.scss") $ do
+    route $ setExtension "css"
+    compile $ sassCompilerWith def { sassOutputStyle = if compress then SassStyleCompressed else SassStyleExpanded
+                                   , sassImporters = Just [ sassImporter ]
+                                     }
+  match ("assets/**.png" .||. "*.ico") $ do
+    route   idRoute
+    compile copyFileCompiler
 
-    -- TODO: Use typescript instead?
-    match "assets/main.js" $ do
-        route $ setExtension "js"
-        compile $ getResourceString
+  match "index.html" $ do
+    route idRoute
+    compile $ getResourceBody
+         >>= applyAsTemplate siteCtx
+         >>= highlightAmulet
+         >>= loadAndApplyTemplate "templates/default.html" siteCtx
+         >>= compresses minifyHtml
 
-    match ("assets/**.png" .||. "*.ico") $ do
-        route   idRoute
-        compile copyFileCompiler
+  match "tutorials/*.ml" $ do
+    route $ setExtension "html"
+    compile $ do
+      opts <- writerOptions
+      Item _ contents <- getResourceBody
 
-    match "index.html" $ do
-        route idRoute
-        compile $ getResourceBody
-             >>= applyAsTemplate siteCtx
-             >>= highlightAmulet
-             >>= loadAndApplyTemplate "templates/default.html" siteCtx
-             >>= compresses minifyHtml
+      (path, handle) <- unsafeCompiler $ openTempFile "/tmp/" "example.ml"
+      () <- unsafeCompiler $ do
+        hPutStr handle contents
+        hFlush handle
 
-    match "templates/*" $ compile templateBodyCompiler
+      body <- unsafeCompiler
+        (readProcess "amc-example" [ path ] "")
+
+      let contents = Item (fromFilePath (path ++ ".md")) body
+          exampleCtx = siteCtx <> constField "example" "true"
+
+      Item _ contents <- writePandocWith opts <$> readPandocWith readerOptions contents
+
+      unsafeCompiler $ removePathForcibly path
+
+      makeItem contents
+        >>= loadAndApplyTemplate "templates/example.html" defaultContext
+        >>= loadAndApplyTemplate "templates/content.html" defaultContext
+        >>= loadAndApplyTemplate "templates/default.html" exampleCtx
+        >>= relativizeUrls
+
+  match "tutorials/*.md" $ do
+    route $ setExtension "html"
+    compile $ pandocCustomCompiler
+      >>= loadAndApplyTemplate "templates/tutorial.html" defaultContext
+      >>= loadAndApplyTemplate "templates/content.html" defaultContext
+      >>= loadAndApplyTemplate "templates/default.html" siteCtx
+      >>= relativizeUrls
+
+  match "tutorials/index.html" $ do
+    route idRoute
+    compile $ do
+      let indexCtx = defaultContext
+            <> listField "entries" siteCtx (loadAll "tutorials/*.md")
+            <> listField "examples" siteCtx (loadAll "tutorials/*.ml")
+      getResourceBody
+        >>= applyAsTemplate indexCtx
+        >>= loadAndApplyTemplate "templates/content.html" defaultContext
+        >>= loadAndApplyTemplate "templates/default.html" siteCtx
+        >>= relativizeUrls
+
+  match "reference/*.md" $ do
+    route $ setExtension "html"
+    compile $ pandocCustomCompiler
+      >>= loadAndApplyTemplate "templates/content.html" defaultContext
+      >>= loadAndApplyTemplate "templates/default.html" siteCtx
+      >>= relativizeUrls
+
+  match "templates/*" $ compile templateBodyCompiler
+
+  match "syntax/*.xml" $ compile $ do
+    path <- toFilePath <$> getUnderlying
+    contents <- itemBody <$> getResourceBody
+    debugCompiler ("Loaded syntax definition from " ++ show path)
+    res <- unsafeCompiler (S.parseSyntaxDefinitionFromString path contents)
+    _ <- saveSnapshot "syntax" =<< either fail makeItem res
+    makeItem contents
+
 
 -- | The default context for the whole site, including site-global
 -- properties.
@@ -66,8 +130,8 @@ siteCtx = defaultContext
        <> constField "site.title" "Amulet ML"
        <> constField "site.description" "Amulet is a simple, functional programming language in the ML tradition"
 
-       <> field "site.versions.main_css" (const . hashCompiler . fromFilePath $ "assets/main.scss")
-       <> field "site.versions.main_js"  (const . hashCompiler . fromFilePath $ "assets/main.js")
+          -- TODO: This needs to be done on the output!
+       <> field "site.versions.main_css" (const . hashCompiler . fromFilePath $ "assets/css/main.scss")
 
 -- | A custom sass importer which also looks within @node_modules@.
 sassImporter :: SassImporter
@@ -204,3 +268,28 @@ minifyHtml' = withTagList (walk [] [] []) where
 -- match.
 hashCompiler :: Identifier -> Compiler String
 hashCompiler x = take 16 . SHA.showDigest . SHA.sha256 . BS.pack <$> loadBody x
+
+-- | The Pandoc compiler, but using our custom 'writerOptions'.
+pandocCustomCompiler :: Compiler (Item String)
+pandocCustomCompiler = pandocCompilerWith readerOptions =<< writerOptions
+
+readerOptions :: ReaderOptions
+readerOptions = def
+  { readerExtensions = pandocExtensions
+  , readerIndentedCodeClasses = ["amulet"] }
+
+writerOptions :: Compiler WriterOptions
+writerOptions = do
+  syntaxMap <- loadAllSnapshots "syntax/*.xml" "syntax"
+           <&> foldr (S.addSyntaxDefinition . itemBody) S.defaultSyntaxMap
+
+  pure $ defaultHakyllWriterOptions
+    { writerExtensions = extensionsFromList
+                         [ Ext_tex_math_dollars
+                         , Ext_tex_math_double_backslash
+                         , Ext_latex_macros
+                         ] <> writerExtensions defaultHakyllWriterOptions
+    , writerHTMLMathMethod = MathJax ""
+    , writerSyntaxMap = syntaxMap
+    , writerHighlightStyle = Just kate
+    }

@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/tmpim/amulet#readme",
   "devDependencies": {
-    "normalize.css": "^8.0.0"
+    "normalize.css": "^8.0.1"
   }
 }

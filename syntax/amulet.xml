@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Kate syntax highlighting for Objective Caml version 4.02 in the standard and revised syntaxes, with Ocamldoc comments. -->
+
+<!DOCTYPE language SYSTEM "language.dtd"
+[
+<!-- Regular expresion constants: -->
+<!ENTITY LOWER  "a-z\300-\326\330-\337">         <!-- Lowercase Latin-1 letters. -->
+<!ENTITY UPPER  "A-Z\340-\366\370-\377">         <!-- Uppercase Latin-1 letters. -->
+<!ENTITY LETTER "&LOWER;&UPPER;">                <!-- All Latin-1 letters. -->
+<!ENTITY LIDENT "[&LOWER;_][&LETTER;0-9_']*">    <!-- Lowercase OCaml identifiers. -->
+<!ENTITY UIDENT "`?[&UPPER;][&LETTER;0-9_']*">   <!-- Uppercase OCaml identifiers. -->
+<!ENTITY IDENT  "`?[&LETTER;][&LETTER;0-9_']*">  <!-- All OCaml identifiers. -->
+<!ENTITY ESC    "(\\[ntbr'&quot;\\]|\\[0-9]{3}|\\x[0-9A-Fa-f]{2})"> <!-- OCaml character code escapes. -->
+<!ENTITY DEC    "[0-9][0-9_]*">                                     <!-- Decimal digits with underscores. -->
+<!ENTITY INFIX  "[:!#$%&amp;*+\\/<=>?@^|-~][:!#$%&amp;*+\\/<=>?@^|-~\.]*">
+]>
+<language name="Amulet"
+          extensions="*.ml;*.mli"
+          mimetype="text/x-amulet"
+          section="Sources"
+          version="6"
+          priority="10"
+          kateversion="2.4"
+          author="Matheus Magalhães de Alcantara (matheus.de.alcantara@gmail.com)"
+          license="LGPL" >
+
+  <highlighting>
+    <list name="Keywords">
+      <item>as</item>
+      <item>forall</item>
+      <item>begin</item>
+      <item>class</item>
+      <item>else</item>
+      <item>end</item>
+      <item>external</item>
+      <item>fun</item>
+      <item>function</item>
+      <item>if</item>
+      <item>in</item>
+      <item>lazy</item>
+      <item>let</item>
+      <item>match</item>
+      <item>module</item>
+      <item>of</item>
+      <item>open</item>
+      <item>then</item>
+      <item>type</item>
+      <item>val</item>
+      <item>with</item>
+      <item>instance</item>
+      <item>rec</item>
+      <item>import</item>
+      <item>and</item>
+    </list>
+
+    <list name="Boolean Literals">
+      <item>true</item>
+      <item>false</item>
+    </list>
+
+    <list name="Pervasive Functions">
+    </list>
+
+    <list name="Pervasive Types">
+      <item>string</item>
+      <item>int</item>
+      <item>float</item>
+      <item>bool</item>
+      <item>unit</item>
+      <item>lazy</item>
+      <item>list</item>
+      <item>constraint</item>
+      <item>ref</item>
+
+      <item>known_string</item>
+      <item>known_int</item>
+      <item>row_cons</item>
+    </list>
+
+    <list name="Standard Library Modules">
+      <item>Amc</item>
+    </list>
+
+    <contexts>
+
+      <context name="Code" lineEndContext="#stay" attribute="Normal">
+
+        <!-- ] and ]} close code samples in Ocamldoc, so -->
+        <!-- nested [ ] and { } brackets have to be allowed for: -->
+        <DetectChar char="[" context="Nested Code 1" attribute="Infix Operator" />
+        <DetectChar char="{" context="Nested Code 2" attribute="Infix Operator" />
+
+
+        <!-- Comments. -->
+        <!-- A (** begins a special comment with Ocamldoc documentation markup. -->
+        <Detect2Chars char="(" char1="*" context="Comment"  attribute="Comment" beginRegion="comment" />
+
+        <!-- Interpreter directives. -->
+        <!-- (These are lines where the first symbol is a '#' followed by an identifier. -->
+        <!-- Such lines could also be part of a method call split over two lines but     -->
+        <!-- it's unlikey anyone would code like that.)                                  -->
+
+        <!-- String, character and Camlp4 "quotation" constants.              -->
+        <!-- Note: If you must modify the pattern for characters be precise:  -->
+        <!-- single quotes have several meanings in Ocaml.                    -->
+        <DetectChar char="&quot;" context="String" attribute="String" />
+        <RegExpr String="'(&ESC;|[^'])'" context="#stay" attribute="Character" />
+
+
+        <!-- Identifiers and keywords. -->
+        <keyword String="Keywords"                 context="#stay" attribute="Keyword" />
+        <keyword String="Pervasive Functions"      context="#stay" attribute="Pervasive Functions" />
+        <keyword String="Pervasive Types"          context="#stay" attribute="Pervasive Types" />
+        <keyword String="Standard Library Modules" context="#stay" attribute="Standard Library Modules" />
+        <keyword String="Boolean Literals"         context="#stay" attribute="Boolean Literals" />
+
+        <RegExpr String="&LIDENT;"                 context="#stay" attribute="Lowercase Identifier" />
+        <RegExpr String="&UIDENT;"                 context="#stay" attribute="Uppercase Identifier" />
+        <RegExpr String="'&LIDENT;"                context="#stay" attribute="Type Variable" />
+        <RegExpr String="[\-!#\$%&amp;\*\+/&lt;=&gt;\?&#92;@\^\|~\.:]+"
+          context="#stay" attribute="Infix Operator" />
+
+        <RegExpr String="," context="#stay" attribute="Infix Operator" />
+
+        <!-- Numeric constants. -->
+        <!-- Note that they may contain underscores. -->
+        <RegExpr String="-?0[xX][0-9A-Fa-f_]+" context="#stay" attribute="Hexadecimal" />
+        <RegExpr String="-?0[oO][0-7_]+" context="#stay" attribute="Octal" />
+        <RegExpr String="-?0[bB][01_]+" context="#stay" attribute="Binary" />
+        <RegExpr String="-?&DEC;(\.&DEC;([eE][-+]?&DEC;)?|[eE][-+]?&DEC;)" context="#stay" attribute="Float" />
+        <RegExpr String="-?&DEC;" context="#stay" attribute="Decimal" />
+
+        <IncludeRules context="Unmatched Closing Brackets" />
+      </context>
+
+      <context name="Nested Code 1" lineEndContext="#stay" attribute="Normal">
+        <DetectChar char="]" context="#pop" attribute="Infix Operator" />
+        <IncludeRules context="Code" includeAttrib="true" />
+      </context>
+
+      <context name="Nested Code 2" lineEndContext="#stay" attribute="Normal">
+        <DetectChar char="}" context="#pop" attribute="Infix Operator" />
+        <IncludeRules context="Code" includeAttrib="true" />
+      </context>
+
+      <context name="String" lineEndContext="#stay" attribute="String">
+        <DetectChar char="&quot;" context="#pop" attribute="String" />
+        <RegExpr String="&ESC;" context="#stay" attribute="Escaped Characters" />
+        <!-- A backslash at the end of a line in a string indicates  -->
+        <!-- that the string will continue on the next line:         -->
+        <RegExpr String="\\$" context="#stay" attribute="Escaped Characters" />
+      </context>
+
+      <context name="Comment" lineEndContext="#stay" attribute="Comment">
+        <Detect2Chars char="*" char1=")" context="#pop" attribute="Comment" endRegion="comment"  />
+        <!-- Support for nested comments: -->
+        <Detect2Chars char="(" char1="*" context="Comment" attribute="Comment" beginRegion="comment" />
+        <!-- Strings in Ocaml comments must be well-formed: -->
+        <DetectChar char="&quot;" context="String in Comment" attribute="String in Comment" />
+      </context>
+
+      <context name="String in Comment" lineEndContext="#stay" attribute="String in Comment">
+        <DetectChar char="&quot;" context="#pop" attribute="String in Comment" />
+        <IncludeRules context="String" />
+      </context>
+
+      <!-- Unmatched closing brackets- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+      <context name="Unmatched Closing Brackets"  lineEndContext="#stay" attribute="Normal">
+        <Detect2Chars char="*" char1=")" context="#pop"  attribute="Mismatched Brackets" />
+        <Detect2Chars char="v" char1="}" context="#stay" attribute="Mismatched Brackets" />
+        <Detect2Chars char="]" char1="}" context="#stay" attribute="Mismatched Brackets" />
+        <Detect2Chars char="%" char1="}" context="#stay" attribute="Mismatched Brackets" />
+        <DetectChar   char="]"           context="#stay" attribute="Mismatched Brackets" />
+        <DetectChar   char="}"           context="#stay" attribute="Mismatched Brackets" />
+      </context>
+    </contexts>
+
+    <itemDatas>
+      <itemData name="Keyword"                 defStyleNum="dsKeyword"  />
+      <itemData name="Normal"                  defStyleNum="dsNormal"   />
+      <itemData name="Infix Operator"          defStyleNum="dsOperator"  />
+
+      <itemData name="Uppercase Identifier"    defStyleNum="dsDataType" italic="true" />
+      <itemData name="Lowercase Identifier"    defStyleNum="dsVariable"   />
+
+      <!-- Lowercase pervasive identifiers: -->
+      <itemData name="Pervasive Functions"      defStyleNum="dsFunction" />
+      <itemData name="Pervasive Types"          defStyleNum="dsDataType" />
+
+      <!-- Type variables -->
+      <itemData name="Type Variable"           defStyleNum="dsSpecialString"  />
+
+      <!-- Uppercase pervasive identifiers: -->
+      <itemData name="Standard Library Modules" defStyleNum="dsDataType" italic="true" />
+
+      <itemData name="Boolean Literals"        defStyleNum="dsConstant"   />
+      <itemData name="Decimal"                 defStyleNum="dsDecVal"   />
+      <itemData name="Hexadecimal"             defStyleNum="dsBaseN"    />
+      <itemData name="Octal"                   defStyleNum="dsBaseN"    />
+      <itemData name="Binary"                  defStyleNum="dsBaseN"    />
+      <itemData name="Float"                   defStyleNum="dsFloat"    />
+
+      <itemData name="Character"               defStyleNum="dsChar"     />
+      <itemData name="String"                  defStyleNum="dsString"   />
+      <itemData name="Escaped Characters"      defStyleNum="dsChar"     />
+
+      <itemData name="Comment"                 defStyleNum="dsComment"  />
+      <itemData name="String in Comment"       defStyleNum="dsComment"  bold="true" />
+      <itemData name="Mismatched Brackets"     defStyleNum="dsError"    />
+
+    </itemDatas>
+  </highlighting>
+
+  <general>
+    <keywords casesensitive="true" />
+    <comments>
+      <comment name="multiLine" start="(*" end="*)" region ="comment" />
+    </comments>
+  </general>
+</language>
+<!-- kate: space-indent on; indent-width 2; replace-tabs on; -->

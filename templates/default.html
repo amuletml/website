@@ -6,7 +6,8 @@
 
     <title>$title$</title>
 
-    <link rel="stylesheet" href="/assets/main.css?v=$site.versions.main_css$" />
+    <link rel="stylesheet" href="/assets/css/main.css?v=$site.versions.main_css$" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
 
     <meta name="description" content="$description$" />
     <meta http-equiv="content-language" content="en-US">
@@ -39,9 +40,40 @@
     <meta name="msapplication-square310x310logo" content="/assets/icon/mstile-310x310.png" />
 
     <meta name="theme-color" content="#5fbcd3">
+
+$if(maths)$
+    <link rel="stylesheet" type="text/css" href="/assets/css/computer-modern.css" />
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      TeX: { equationNumbers: { autoNumber: "all" }
+           , extensions: ["color.js"] }
+    });
+    </script>
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_HTML"></script>
+$endif$
+
   </head>
   <body>
+    <nav>
+      <div class="nav-icon">
+        <a href="/" title="Amulet" class="nav-button">
+          <svg viewBox="0 0 26 26"><use xlink:href="/assets/sprites.svg#logo"></use></svg>
+          <span>Amulet</span>
+        </a>
+      </div>
+
+      <ul class="nav-buttons">
+        <li>
+          <a href="https://github.com/amuletml/amulet" title="The Amulet repository on GitHub" class="nav-button">
+            <span>
+              <span class="fa fa-github" aria-hidden="true"></span>
+              GitHub
+            </span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
     $body$
-    <script type="text/javascript" src="assets/main.js?v=$site.versions.main_js$"></script>
   </body>
 </html>

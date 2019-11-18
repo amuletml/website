@@ -10,6 +10,7 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 import qualified Data.Digest.Pure.SHA as SHA
 import qualified Data.HashSet as HSet
 import qualified Data.Text as T
+import Data.Map (Map)
 import Data.Functor
 import Data.Default
 import Data.List
@@ -54,9 +55,12 @@ main = hakyllWith def { previewHost = "0.0.0.0"
 
   match "index.html" $ do
     route idRoute
-    compile $ getResourceBody
+    compile $ do
+      syntaxMap <- loadAllSnapshots "syntax/*.xml" "syntax"
+               <&> foldr (S.addSyntaxDefinition . itemBody) S.defaultSyntaxMap
+      getResourceBody
          >>= applyAsTemplate siteCtx
-         >>= highlightAmulet
+         >>= highlightAmulet syntaxMap
          >>= defaultTemplate
 
   match "tutorials/*.ml" $ do
@@ -140,8 +144,8 @@ sassImporter = SassImporter 0 go where
 -- This uses the OCaml highligher from Skylight for now (which is what
 -- Pandoc uses), but we will move this to use the Amulet compiler in the
 -- future.
-highlightAmulet :: Item String -> Compiler (Item String)
-highlightAmulet = pure . fmap (withTagList walk) where
+highlightAmulet :: Map T.Text S.Syntax -> Item String -> Compiler (Item String)
+highlightAmulet syntaxMap = pure . fmap (withTagList walk) where
   walk [] = []
   walk (o@(TS.TagOpen "pre" attrs):TS.TagText src:c@(TS.TagClose "pre"):xs)
     | elem ("data-language", "amulet") attrs
@@ -157,8 +161,8 @@ highlightAmulet = pure . fmap (withTagList walk) where
 
   highlight :: String -> [TS.Tag String]
   highlight txt =
-    let Just syntax = S.lookupSyntax "Objective Caml" S.defaultSyntaxMap
-        Right lines = S.tokenize (S.TokenizerConfig S.defaultSyntaxMap False) syntax . dropIndent . T.pack $ txt
+    let Just syntax = S.lookupSyntax "Amulet" syntaxMap
+        Right lines = S.tokenize (S.TokenizerConfig syntaxMap False) syntax . dropIndent . T.pack $ txt
     in foldr (flip (foldr mkElement . (TS.TagText "\n":))) [] lines
 
   mkElement :: S.Token -> [TS.Tag String] -> [TS.Tag String]

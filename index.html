@@ -14,54 +14,128 @@ description: A programming language
 
 <section class="contrasted">
   <div class="page-container">
-    <h2>A darn rootin' tootin' language</h2>
+    <h2>A more elegant weapon, for a more civilised age</h2>
     <p>
-      Amulet takes the beauty and power of existing functional languages like ML and Haskell, strips them down to
-      their bare essentials and builds up a new, elegant language.
+      Amulet is a simple, modern programming language based on the long
+      tradition of the ML family, bringing improvements from the
+      cutting-edge of programming language research.
     </p>
+    <p style="margin-bottom: 10px">
+      Amulet's type system supports many advanced features, including
+      but not limited to:
+    </p>
+    <ul style="margin-top: 2px">
+      <li>Generalised Algebraic Data Types (GADTs),</li>
 
-    <p>
-      Amulet provides support for higher-rank parametric polymorphic types and row-polymorphic records, pattern
-      matching with algebraic data types, and tail recursion elimination.
-    </p>
+      <li>
+        Multi-parameter type classes with <em>associated types</em>
+        and <em>functional dependencies</em>, including support for
+        quantified constraints,
+      </li>
+
+      <li>
+        Type functions supporting dependent kinds, and equality
+        constraints,
+      </li>
+
+      <li>
+        Rank-N, impredicative types via Quick Look: &#x2200;
+        quantifiers can appear anywhere in a type, not only the top-level,
+      </li>
+
+      <li>
+        Principled, extensible records via row polymorphism support
+        inference of principal types.
+      </li>
+    </ul>
   </div>
 </section>
 
 <section class="features">
   <div class="page-container">
-    <h3>Syntax</h3>
+    <h3>Simple syntax</h3>
     <div class="annotated-example">
       <pre data-language="amulet" class="highlight">
-        let () =
-          let value = Random.of_range 1 10 (* 1 *)
-          print "Guess a number between 1 and 10: "
-          match IO.read with (* 2 *)
-          | Nothing -> print "Not a number"
-          | Just guess when value = guess (* 3 *) -> print "Correct!"
-          | Just _ -> print "Incorrect"
-      </pre>
-      <ol>
-        <li>Minimal syntax, meaning semicolons, <code>in</code> and other verbosity is entirely optional.</li>
-        <li>Implicit type classes allows for a smarter form of overloading.</li>
-        <li>Pattern matching and guards make it possible to write more intuitive code.</li>
-      </ol>
-    </div>
+let map f = function (* 1 *)
+| [] -> []
+| Cons (x, xs) -> Cons (f x, map f xs) (* 2*)
 
-    <h3>Streams and sugar</h3>
-    <div class="annotated-example">
-      <pre data-language="amulet" class="highlight">
-        let () =
-         Stream.range 1 100 (* 1 *)
-         |> Stream.map (+10) (* 2 *)
-         |> Stream.fold (+) 0
-         |> (* 3 *) print
+let filter p xs = [ x | with x <- xs, p x ] (* 3*)
       </pre>
       <ol>
         <li>
-          A sometimes smart optimiser allows you to manipulate streams without worrying about a loss of performance.
+          Minimalist syntax: semicolons, <code>in</code> and other
+          noise is entirely optional.
         </li>
-        <li>Operators sections make higher order functions even easier to use</li>
-        <li>Define custom operators to write code more concisely.</li>
+        <li>
+          Pattern matching and guards make writing code more
+          intuitive.
+        </li>
+        <li>
+          List comprehensions are a short and sweet way of expressing
+          complex computations on lists.
+        </li>
       </ol>
+    </div>
+
+    <h3>Powerful types</h3>
+    <div class="annotated-example">
+      <pre data-language="amulet" class="highlight">
+type vect 'n 'a =    (* 1 *)
+  | Nil  : vect Z 'a (* 2 *)
+  | Cons : forall 'a. 'a * vect 'n 'a -> vect (S 'n) 'a
+
+(* 3 *)
+let rec map (f : 'a -> 'b) (xs : vect 'n 'a) : vect 'n 'b =
+  match xs with
+  | Nil -> Nil
+  | Cons (x, xs) -> Cons (f x, map f xs)
+      </pre>
+      <ol>
+        <li>
+          Types can be parametrised by not only other types, but all
+          manners of data types: type constructors, naturals,
+          integers&#x2026;</li>
+        <li>
+          Indexed types let constructors vary their return types,
+          enforcing invariants statically.
+        </li>
+        <li>
+          Polymorphic type annotations enforce strict contracts on
+          implementations, more often than not forbidding incorrect
+          implementations entirely.
+        </li>
+      </ol>
+    </div>
+    <h3>Type-level computation</h3>
+    <div class="annotated-example">
+      <pre data-language="amulet" class="highlight">
+type function 'n :+ 'k begin  (* 1 *)
+  Z      :+ 'n = 'n           (* 2 *)
+  (S 'n) :+ 'k = S ('n :+ 'k) (* 3 *)
+end
+
+let rec append (xs : vect 'n 'a) (ys : vect 'k 'a) : vect ('n :+ 'k) 'b =
+  match xs with
+  | Nil -> ys
+  | Cons (x, xs) -> Cons (x, append xs ys)
+      </pre>
+      <ol>
+        <li>
+          Type functions let the programmer express complex invariants
+          in a functional language rather than trying to wrangle
+          type-level prolog.
+        <li>
+          Functions at the type level are defined by pattern matching
+          and compute by &beta;-reduction, much like at the value level.
+        </li>
+        <li>
+          A powerful termination checker ensures that your type-level
+          functions won't send the type checker into a tailspin. Even
+          then, the type checker has resource limits to ensure it does
+          not run away.
+        </li>
+      </ol>
+    </div>
   </div>
 </section>

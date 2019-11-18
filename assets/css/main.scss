@@ -72,9 +72,14 @@ header {
   // background: #282c34;
   color: #303030;
 
-  .tok-string { color: #00C918; }
-  .tok-keyword { color: #AD00A1; }
-  .tok-comment { color: #909090; }
+  .tok-string   { color: #CB4B16; }
+  .tok-decval   { color: #268BD2; }
+  .tok-keyword  { color: #AF005F; }
+  .tok-comment  { color: #909090; }
+  .tok-operator { color: #D33682; }
+
+  .tok-specialstring { color: #2AA198; }
+  .tok-datatype      { color: #5F5FAF; }
 
   .tok-annotate {
     text-align: center;

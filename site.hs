@@ -70,6 +70,16 @@ main = hakyllWith def { previewHost = "0.0.0.0"
          >>= highlightAmulet syntaxMap
          >>= defaultTemplate
 
+  match "tutorials/index.html" $ do
+    route idRoute
+    compile $ do
+      let indexCtx = siteCtx
+            <> listField "entries" siteCtx (loadAll "tutorials/*.md")
+            <> listField "examples" siteCtx (loadAll "tutorials/*.ml")
+      getResourceBody
+        >>= applyAsTemplate indexCtx
+        >>= defaultTemplate
+
   match "tutorials/*.ml" $ do
     route $ setExtension "html"
     compile $ do
@@ -96,16 +106,6 @@ main = hakyllWith def { previewHost = "0.0.0.0"
     compile $ pandocCustomCompiler
           >>= loadAndApplyTemplate "templates/tutorial.html" defaultContext
           >>= contentTemplate
-
-  match "tutorials/index.html" $ do
-    route idRoute
-    compile $ do
-      let indexCtx = defaultContext
-            <> listField "entries" siteCtx (loadAll "tutorials/*.md")
-            <> listField "examples" siteCtx (loadAll "tutorials/*.ml")
-      getResourceBody
-        >>= applyAsTemplate indexCtx
-        >>= contentTemplate
 
   match "reference/*.md" $ do
     route $ setExtension "html"

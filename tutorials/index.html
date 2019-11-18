@@ -3,32 +3,44 @@ title: Tutorials
 description: A list of tutorials and examples for Amulet
 ---
 
-<p>
-  These are the tutorials for the Amulet programming language.
-  For installation instructions, please refer to
-  <a href="/tutorials/00-installing.html">this page</a>.
-</p>
+<header>
+  <div class="page-container">
+    <div class="header-logo">
+      <svg viewBox="0 0 100 26"><use xlink:href="/assets/sprites.svg#logo-title"></use></svg>
+    </div>
+  </div>
+</header>
 
-<blockquote class=new>
-  <p>
-    <a href="/tutorials/00-installing.html">Start here!</a>
-  </p>
-</blockquote>
+<section class="contrasted">
+  <div class="page-container">
+    <p>
+      <h2>These are the tutorials for the Amulet programming
+        language.</h2>
+      For installation instructions, please refer to
+      <a href="/tutorials/00-installing.html">this page</a>.
+    </p>
+    <p>
+      <a href="/tutorials/00-installing.html">Start here!</a>
+    </p>
+  </div>
+</section>
 
-<h3>Example Index</h3>
-<ul>
-  $for(examples)$
-    <li>
-      <a href="$url$">$title$</a>
-    </li>
-  $endfor$
-</ul>
+<div class="page-container">
+  <h3>Example Index</h3>
+  <ul>
+    $for(examples)$
+      <li>
+        <a href="$url$">$title$</a>
+      </li>
+    $endfor$
+  </ul>
 
-<h3>Tutorial Index</h3>
-<ul>
-  $for(entries)$
-    <li>
-      <a href="$url$">$title$</a>
-    </li>
-  $endfor$
-</ul>
+  <h3>Tutorial Index</h3>
+  <ul>
+    $for(entries)$
+      <li>
+        <a href="$url$">$title$</a>
+      </li>
+    $endfor$
+  </ul>
+</section>

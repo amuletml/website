@@ -72,13 +72,7 @@ header {
   color: #fff;
 
   padding: 20px 0;
-  a {
-    color: #eee;
-  }
-
-  a:visited {
-    color: #222;
-  }
+  @include link(#fff, darken(#fff, 10%));
 }
 
 .annotated-example {

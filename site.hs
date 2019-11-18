@@ -129,8 +129,6 @@ siteCtx :: Context String
 siteCtx = defaultContext
        <> constField "site.title" "Amulet ML"
        <> constField "site.description" "Amulet is a simple, functional programming language in the ML tradition"
-
-          -- TODO: This needs to be done on the output!
        <> field "site.versions.main_css" (const . hashCompiler . fromFilePath $ "assets/css/main.scss")
 
 -- | Apply the default content template
@@ -273,11 +271,12 @@ minifyHtml' = withTagList (walk [] [] []) where
   -- | Tags which are "inline" or contain inline content, and thus should
   -- have leading/trailing spaces preserved.
   inline = flip HSet.member $ HSet.fromList
-    [ "a", "abbr", "acronym", "b", "bdi", "bdo", "big", "button", "cite", "code"
-    , "del", "dfn", "em", "font", "figcaption", "i", "img", "input", "ins", "kbd"
-    , "label" , "li", "mark", "math", "nobr", "object", "p", "q", "rp", "rt"
-    , "rtc", "ruby", "s", "samp", "select", "small", "span", "strike", "strong"
-    , "sub", "sup", "svg", "td", "textarea", "time", "tt", "u", "var", "wbr"
+    [ "a", "abbr", "acronym", "b", "bdi", "bdo", "big", "blockquote", "button"
+    , "cite", "code", "del", "dfn", "em", "font", "figcaption", "i", "img"
+    , "input", "ins", "kbd", "label" , "li", "mark", "math", "nobr", "object"
+    , "p", "q", "rp", "rt", "rtc", "ruby", "s", "samp", "select", "small"
+    , "span", "strike", "strong", "sub", "sup", "svg", "td", "textarea", "time"
+    , "tt", "u", "var", "wbr"
     ]
 
   trim _ "" = ""

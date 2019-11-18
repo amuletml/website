@@ -5,30 +5,32 @@ nav {
   height: $nav-height;
   background: $dark-blue;
   color: #fff;
-  font-size: 1.1em;
+  font-size: 1.05em;
 
   a { text-decoration: none; }
   @include link(#fff, #fff);
   @include link-bg($dark-blue, darken($dark-blue, 5%));
 
-  .nav-icon { height: $nav-height - 10px; }
-
   .nav-left { float: left; }
   .nav-right { float: right; }
+
+  .nav-title { font-size: 1.2em;  }
+  .nav-icon { height: $nav-height - 10px; }
 
   ul {
     margin: 0px;
     padding: 0px;
     list-style: none;
     height: $nav-height;
+    display: flex;
   }
 
   li {
     height: 100%;
     padding: 0px;
     margin: 0px;
-    display: block;
-    float: left;
+    display: flex;
+    align-items: center;
 
     > a {
       height: $nav-height;
@@ -36,6 +38,21 @@ nav {
       box-sizing: border-box;
       display: flex;
       align-items: center;
+    }
+
+    &::before {
+      content:'';
+
+      width: 1px;
+      height: $nav-height - 20px;
+      background: #fff;
+      display: block;
+      margin: 10px 5px;
+    }
+
+
+    &:first-child::before {
+      display: none;
     }
   }
 }

@@ -75,7 +75,7 @@ Definitions can be made using the `let ... = ...` form:
 
 ```amulet
 > let x = 2
-x : int = 2
+x = 2
 > x * x
 _ = 4
 ```
@@ -84,11 +84,11 @@ Amulet will prevent us from adding a `float`{.amulet}ing-point number to
 an `int`{.amulet}eger:
 
 ```amulet
-> x * 2.0
+> x + 2.0
 (*
 =stdin[1:5 ..1:7]: error
   │ 
-1 │ x * 2.0
+1 │ x + 2.0
   │     ^^^
   Couldn't match actual type float
     with the type expected by the context, int

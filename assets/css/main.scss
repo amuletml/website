@@ -91,21 +91,39 @@ header {
 }
 
 .example {
+  display: grid;
+  grid-template-columns: [explain] 50% [code] 50% [end];
+
   tr:hover {
     background: #f0f0f0;
     .code-td { background: #e0e0e0; }
   }
+
+  table {
+    grid-column: explain / end;
+    .explanation, .code-td { width: 50%; }
+  }
+
   .explanation {
-    width: 50%;
     box-sizing: border-box;
     padding-right: 10px;
     vertical-align: baseline;
   }
 
-  .code-td {
-    width: 50%;
+  .code-td, .code-cell {
     background: #eee;
     border-left: solid 2px #aaa;
     vertical-align: baseline;
+    overflow-y: auto;
+  }
+
+  > .explanation { grid-column: explain; }
+  > .code-cell { grid-column: code; }
+
+  @media(max-width: 600px) {
+    & { grid-template-columns: [everything] 100%; }
+    > .explanation { grid-column: everything; }
+    > .code-cell { grid-column: everything; }
+
   }
 }

@@ -94,11 +94,6 @@ header {
   display: grid;
   grid-template-columns: [explain] 50% [code] 50% [end];
 
-  tr:hover {
-    background: #f0f0f0;
-    .code-td { background: #e0e0e0; }
-  }
-
   table {
     grid-column: explain / end;
     .explanation, .code-td { width: 50%; }

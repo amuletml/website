@@ -31,6 +31,8 @@ blockquote {
   border: 2px solid $light-blue;
   padding: 0.8em;
   border-radius: 0.4em;
+
+  @media(max-width: 600px) { margin: 0.2em; }
 }
 
 .page-container {
@@ -43,6 +45,8 @@ blockquote {
   text-align: justify;
   max-width: 80ch;
   margin: auto;
+
+  pre { overflow-y: auto; }
 }
 
 header {

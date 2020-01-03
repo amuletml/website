@@ -254,7 +254,7 @@ explained in later tutorials, as they are very complicated indeed.
 `float`{.amulet}.
 
 [^3]: Records can be extended [using
-magic](https://hydraz.semi.works/posts/2019-09-22.html).
+magic](https://abby.amulet.works/posts/2019-09-22.html).
 
 [editor integration]: https://github.com/tmpim/amulet/tree/master/editor
 [using amc-prove]: /posts/2019-09-29.html

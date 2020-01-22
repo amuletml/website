@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tmpim/amulet.git"
+    "url": "git+https://github.com/amuletml/website.git"
   },
-  "author": "SquidDev and hydraz",
+  "author": "SquidDev and Abigail",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/tmpim/amulet/issues"
+    "url": "https://github.com/amuletml/amulet/issues"
   },
-  "homepage": "https://github.com/tmpim/amulet#readme",
+  "homepage": "https://github.com/amuletml/amulet#readme",
   "devDependencies": {
     "normalize.css": "^8.0.1"
   }

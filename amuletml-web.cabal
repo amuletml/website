@@ -4,7 +4,7 @@ synopsis:            A functional programming language
 homepage:            https://amulet.works
 license:             BSD3
 license-file:        LICENSE
-author:              hydraz, squiddev
+author:              Abigail, SquidDev
 maintainer:          urn@semi.works
 category:            Website
 build-type:          Simple

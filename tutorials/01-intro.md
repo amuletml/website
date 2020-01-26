@@ -255,6 +255,6 @@ explained in later tutorials, as they are very complicated indeed.
 
 [^3]: Records can be extended [using magic](https://abby.how/posts/2019-09-22.html).
 
-[editor integration]: https://github.com/tmpim/amulet/tree/master/editor
+[editor integration]: https://github.com/amuletml/amulet/tree/master/editor
 [using amc-prove]: https://abby.how/posts/2019-09-29.html
-[Amulet]: https://github.com/tmpim/amulet
+[Amulet]: https://github.com/amuletml/amulet

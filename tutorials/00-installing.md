@@ -22,7 +22,7 @@ nightly channels. It will tell you what key you need to import if the
 signature is invalid.
 
 [issue]:
-https://github.com/tmpim/amulet/issues/new?title=Installation%20Failure&labels=x-distribution
+https://github.com/amuletml/amulet/issues/new?title=Installation%20Failure&labels=x-distribution
 
 ### Building from source (anything else)
 
@@ -31,7 +31,7 @@ Make sure you have [the Haskell Stack] installed.
 Clone the repository and install using Stack:
 
 ```
-git clone https://github.com/tmpim/amulet --depth 1
+git clone https://github.com/amuletml/amulet --depth 1
 cd amulet
 stack install
 ```

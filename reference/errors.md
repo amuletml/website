@@ -6,7 +6,7 @@ description: An index of all AMulet errrors, with long-form explanations.
 This is an index of all the Amulet errors with long-form explanations,
 as can be found [here] in the compiler repository, generated at 04/11/19.
 
-[here]: https://github.com/tmpim/amulet/tree/master/doc
+[here]: https://github.com/amuletml/amulet/tree/master/doc
 
 Keep in mind that the compiler can also print these explanations, using
 the `amc explain [number]`{} subcommand.
@@ -451,7 +451,7 @@ compiler, since badly-scoped programs should be rejected by the resolver
 Please upload your program to a pastebin site and open an issue in the
 Amulet repository:
 
-  https://github.com/tmpim/amulet/issues/new?title=TC%20Not%20in%20scope
+  https://github.com/amuletml/amulet/issues/new?title=TC%20Not%20in%20scope
 
 Try to reduce your program to the smallest possible that still exhibits
 the bug.
@@ -1046,7 +1046,7 @@ Please note that Amulet's parser may not be entirely correct. If you
 receive this error, and you are sure that your code is syntactically
 valid, please file a bug report[1].
 
-[1]: https://github.com/tmpim/amulet/issues/new?title=Lua%20parser%20bug
+[1]: https://github.com/amuletml/amulet/issues/new?title=Lua%20parser%20bug
 
 ### E3004: "LazyLet" {#LazyLet}
 When an expression is expected to have the type of 'lazy', Amulet will

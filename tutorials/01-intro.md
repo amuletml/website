@@ -253,9 +253,8 @@ explained in later tutorials, as they are very complicated indeed.
 [^2]: The division operator on `int`{.amulet}s returns a
 `float`{.amulet}.
 
-[^3]: Records can be extended [using
-magic](https://abby.amulet.works/posts/2019-09-22.html).
+[^3]: Records can be extended [using magic](https://abby.how/posts/2019-09-22.html).
 
 [editor integration]: https://github.com/tmpim/amulet/tree/master/editor
-[using amc-prove]: /posts/2019-09-29.html
+[using amc-prove]: https://abby.how/posts/2019-09-29.html
 [Amulet]: https://github.com/tmpim/amulet

@@ -21,9 +21,9 @@ let foo x = x + x
 (* `(+)`{.amulet} operates on ints, `(+.)`{.amulet} on floats. *)
 let bar x = x +. x
 
-(* The `type`{.amulet} construct can be used to define a new data type *)
+(* The `type`{.amulet} construct can be used to define a new data type.
+   Types are defined by listing their constructors *)
 type foo =
-(* Types are defined by listing their constructors *)
   | Foo_str of string
   | Foo_int of int
 
@@ -60,10 +60,7 @@ type chain =
   | Chain_end
   | Chain_add of string * chain
 
-(*
-Recursive functions do not need a `rec`{.ocaml} keyword as in
-OCaml.
-*)
+(* Recursive functions need a `rec`{.ocaml} keyword, as in OCaml. *)
 
 let rec str_of_chain = function
   | Chain_end -> "end"
@@ -71,10 +68,8 @@ let rec str_of_chain = function
   | Chain_add (x, rest) ->
       x ^ " + " ^ str_of_chain rest
 
-(*
-Types can have parameters. These stand for another type, and can be
-inferred.
-*)
+(* Types can have parameters. These stand for another type, and can be
+   inferred.  *)
 
 type li 'a =
   | Nil_
@@ -178,15 +173,15 @@ let might_fail x =
 
 (* The `monad option`{.amulet} instance aborts the computation when it
 encounters a `None`{.amulet}. *)
-let None = begin
-  with x <- might_fail 1
-  with y <- might_fail 11
+let None = do
+  let! x = might_fail 1
+  let! y = might_fail 11
   pure (x + y)
 end
 
 (* Computations without `None`{.amulet} are simply chained. *)
-let Some 2 = begin
-  with x <- might_fail 1
-  with y <- might_fail 1
+let Some 2 = do
+  let! x = might_fail 1
+  let! y = might_fail 1
   pure (x + y)
 end

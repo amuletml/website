@@ -87,7 +87,7 @@ an `int`{.amulet}eger:
 > x + 2.0
 (*
 =stdin[1:5 ..1:7]: error
-  │ 
+  │
 1 │ x + 2.0
   │     ^^^
   Couldn't match actual type float
@@ -211,8 +211,8 @@ from having _not enough_.
 ### Using the Compiler
 
 The Amulet compiler, `amc`, supports both batch compilation (where a
-list of files is compiled into a single Lua file) and interactive
-execution, where you load a file and can interact with it from the REPL.
+file is compiled into Lua) and interactive execution, where you load a
+file and can interact with it from the REPL.
 
 There is as of writing no mechanism for compiling multiple files other
 than listing them all in the `amc` invocation, in dependency order. For
@@ -220,20 +220,19 @@ instance, if `main` depends on `mod1`, which depends on `mod2`, you'd
 have to compile them as such (calling the output file `main.lua`):
 
 ```bash
-$ amc mod2.ml mod1.ml main.ml -o main.lua
+$ amc compile main.ml -o main.lua
 ```
 
-If you want to enter the REPL with the three files loaded, add the
-`--repl` switch. Additionally, the `--port` switch can be used to
-control the port on which the Amulet REPL server will listen (this is
-used for the work in progress [editor integration]).
+If you want to enter the REPL with files loaded, replace the `compile`
+command with `repl` .
 
 Note that, in the top-level of a file, only declarations can be present.
 To evaluate an expression for its side effects, bind it to the wildcard
-pattern `_`{.amulet}:
+pattern `_`{.amulet}. When the expression is of type `unit`{.amulet},
+you may also use `()`{.amulet} for greater clarity:
 
 ```amulet
-let _ = print "hello, world!"
+let () = put_line "hello, world!"
 ```
 
 Foreign functions can be defined using the `external val` construct. The
@@ -243,7 +242,7 @@ definition, escape the newline character by placing a backslash (` \\ `)
 right before the line break.
 
 ```amulet
-external val print : string -> unit = "print"
+external val put_line : string -> unit = "print"
 ```
 
 

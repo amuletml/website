@@ -13,6 +13,7 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 import qualified Data.Digest.Pure.SHA as SHA
 import qualified Data.HashSet as HSet
 import qualified Data.Text.Read as T
+import qualified Data.Text.Lazy as L
 import qualified Data.Text as T
 import Data.Foldable
 import Data.Map (Map)
@@ -119,7 +120,7 @@ main = hakyllWith def { previewHost = "0.0.0.0"
     path <- toFilePath <$> getUnderlying
     contents <- itemBody <$> getResourceBody
     debugCompiler ("Loaded syntax definition from " ++ show path)
-    res <- unsafeCompiler (S.parseSyntaxDefinitionFromString path contents)
+    let res = S.parseSyntaxDefinitionFromText path (L.pack contents)
     _ <- saveSnapshot "syntax" =<< either fail makeItem res
     makeItem contents
 

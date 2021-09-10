@@ -173,15 +173,13 @@ let might_fail x =
 
 (* The `monad option`{.amulet} instance aborts the computation when it
 encounters a `None`{.amulet}. *)
-let None = do
+let None =
   let! x = might_fail 1
   let! y = might_fail 11
   pure (x + y)
-end
 
 (* Computations without `None`{.amulet} are simply chained. *)
-let Some 2 = do
+let Some 2 =
   let! x = might_fail 1
   let! y = might_fail 1
   pure (x + y)
-end
